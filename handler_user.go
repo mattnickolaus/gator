@@ -74,7 +74,33 @@ func HandlerReset(s *state, cmd command) error {
 		return fmt.Errorf("Error: %v", err)
 	}
 
-	fmt.Printf("Reset successful: All users deleted from the database")
+	fmt.Printf("Reset successful: All users deleted from the database\n")
 
 	return nil
+}
+
+func HandlerUsers(s *state, cmd command) error {
+	if numArgs := len(cmd.Args); numArgs > 0 {
+		return fmt.Errorf("users command accepts NO arguments")
+	}
+
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error: %v", err)
+	}
+
+	if len(users) == 0 {
+		return fmt.Errorf("Error: There are currently no registered users")
+	}
+
+	for _, u := range users {
+		userLine := fmt.Sprintf("* %s", u)
+		if u == s.cfg.CurrentUserName {
+			userLine += " (current)"
+		}
+		fmt.Println(userLine)
+	}
+
+	return nil
+
 }
