@@ -41,7 +41,20 @@ func HandlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("Error creating feed in DB: %v\n", err)
 	}
 
+	followParam := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    currentUser.ID,
+		FeedID:    createdFeed.ID,
+	}
+
+	followedRowData, err := s.db.CreateFeedFollow(context.Background(), followParam)
+	if err != nil {
+		return fmt.Errorf("Error writing the feed follow: %v\n", err)
+	}
 	fmt.Printf("created new feed record with the following data:\n%+v\n", createdFeed)
+	fmt.Printf("You (%v) are now following this feed\n", followedRowData.UserName)
 
 	return nil
 }
@@ -63,6 +76,66 @@ func HandlerFeeds(s *state, cmd command) error {
 		formattedCreated := feed.CreatedAt.Format("2006-01-02 15:04:05")
 
 		fmt.Printf("%d\t%s\t%v\t%v\t%v\n", i, feed.Name, feed.Url, feed.UserName, formattedCreated)
+	}
+
+	return nil
+}
+
+func HandlerFeedFollow(s *state, cmd command) error {
+	if numArgs := len(cmd.Args); numArgs != 1 {
+		return fmt.Errorf("The follow command accepts a single argument:\n\tUrl: the url to the chosen feed to follow")
+	}
+	feedsUrl := cmd.Args[0]
+
+	chosenFeed, err := s.db.GetFeedByUrl(context.Background(), feedsUrl)
+	if err != nil {
+		return fmt.Errorf("Error: Unable to retrieve feed with that url\n%v\n", err)
+	}
+
+	currentUserName := s.cfg.CurrentUserName
+	currentUser, err := s.db.GetUser(context.Background(), currentUserName)
+	if err != nil {
+		return fmt.Errorf("Error finding user ID: %v\n", err)
+	}
+
+	followParam := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    currentUser.ID,
+		FeedID:    chosenFeed.ID,
+	}
+
+	followedRowData, err := s.db.CreateFeedFollow(context.Background(), followParam)
+	if err != nil {
+		return fmt.Errorf("Error writing the feed follow: %v\n", err)
+	}
+
+	formattedCreated := followedRowData.CreatedAt.Format("2006-01-02 15:04:05")
+	fmt.Printf("Follow Record Created:\nUser: %v\tFeed: %v\t%v\n", followedRowData.UserName, followedRowData.FeedName, formattedCreated)
+
+	return nil
+}
+
+func HandlerFollowing(s *state, cmd command) error {
+	if numArgs := len(cmd.Args); numArgs != 0 {
+		return fmt.Errorf("The following command accepts no arguments")
+	}
+
+	currentUserName := s.cfg.CurrentUserName
+	currentUser, err := s.db.GetUser(context.Background(), currentUserName)
+	if err != nil {
+		return fmt.Errorf("Error finding user ID: %v\n", err)
+	}
+
+	following, err := s.db.GetFeedFollowsForUser(context.Background(), currentUser.ID)
+	if err != nil {
+		return fmt.Errorf("Error retrieving followed feeds: %v\n", err)
+	}
+
+	fmt.Printf("You (%v) are following these feeds:\n", currentUser.Name)
+	for _, feed := range following {
+		fmt.Printf("\t* %v\n", feed.FeedName)
 	}
 
 	return nil

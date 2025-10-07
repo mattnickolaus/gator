@@ -15,3 +15,7 @@ SELECT feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feed
 FROM feeds
 JOIN users 
 ON feeds.user_id = users.id;
+
+-- name: GetFeedByUrl :one
+SELECT * FROM feeds 
+WHERE url = $1 LIMIT 1;
