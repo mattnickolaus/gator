@@ -9,18 +9,12 @@ import (
 	"github.com/mattnickolaus/gator/internal/database"
 )
 
-func HandlerAddFeed(s *state, cmd command) error {
+func HandlerAddFeed(s *state, cmd command, user database.User) error {
 	if numArgs := len(cmd.Args); numArgs != 2 {
 		return fmt.Errorf("addfeed command requires two arguments\n\tname: The name of the feed\n\turl: The url of the feed\n")
 	}
 	name := cmd.Args[0]
 	url := cmd.Args[1]
-
-	currentUserName := s.cfg.CurrentUserName
-	currentUser, err := s.db.GetUser(context.Background(), currentUserName)
-	if err != nil {
-		return fmt.Errorf("Error finding user ID: %v\n", err)
-	}
 
 	feed, err := fetchFeed(context.Background(), url)
 	if err != nil {
@@ -34,7 +28,7 @@ func HandlerAddFeed(s *state, cmd command) error {
 		UpdatedAt: time.Now(),
 		Name:      name,
 		Url:       url,
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 	}
 	createdFeed, err := s.db.CreateFeed(context.Background(), feedParam)
 	if err != nil {
@@ -45,7 +39,7 @@ func HandlerAddFeed(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 		FeedID:    createdFeed.ID,
 	}
 
@@ -81,7 +75,7 @@ func HandlerFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func HandlerFeedFollow(s *state, cmd command) error {
+func HandlerFeedFollow(s *state, cmd command, user database.User) error {
 	if numArgs := len(cmd.Args); numArgs != 1 {
 		return fmt.Errorf("The follow command accepts a single argument:\n\tUrl: the url to the chosen feed to follow")
 	}
@@ -92,17 +86,11 @@ func HandlerFeedFollow(s *state, cmd command) error {
 		return fmt.Errorf("Error: Unable to retrieve feed with that url\n%v\n", err)
 	}
 
-	currentUserName := s.cfg.CurrentUserName
-	currentUser, err := s.db.GetUser(context.Background(), currentUserName)
-	if err != nil {
-		return fmt.Errorf("Error finding user ID: %v\n", err)
-	}
-
 	followParam := database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 		FeedID:    chosenFeed.ID,
 	}
 
@@ -117,23 +105,17 @@ func HandlerFeedFollow(s *state, cmd command) error {
 	return nil
 }
 
-func HandlerFollowing(s *state, cmd command) error {
+func HandlerFollowing(s *state, cmd command, user database.User) error {
 	if numArgs := len(cmd.Args); numArgs != 0 {
 		return fmt.Errorf("The following command accepts no arguments")
 	}
 
-	currentUserName := s.cfg.CurrentUserName
-	currentUser, err := s.db.GetUser(context.Background(), currentUserName)
-	if err != nil {
-		return fmt.Errorf("Error finding user ID: %v\n", err)
-	}
-
-	following, err := s.db.GetFeedFollowsForUser(context.Background(), currentUser.ID)
+	following, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return fmt.Errorf("Error retrieving followed feeds: %v\n", err)
 	}
 
-	fmt.Printf("You (%v) are following these feeds:\n", currentUser.Name)
+	fmt.Printf("You (%v) are following these feeds:\n", user.Name)
 	for _, feed := range following {
 		fmt.Printf("\t* %v\n", feed.FeedName)
 	}

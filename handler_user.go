@@ -10,6 +10,16 @@ import (
 	"github.com/mattnickolaus/gator/internal/database"
 )
 
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	return func(s *state, cmd command) error {
+		currentUser, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+		if err != nil {
+			return fmt.Errorf("Error finding user ID: %v\n", err)
+		}
+		return handler(s, cmd, currentUser)
+	}
+}
+
 func HandlerLogins(s *state, cmd command) error {
 	if numArgs := len(cmd.Args); numArgs == 0 || numArgs > 1 {
 		return fmt.Errorf("Error: the login expects a single argument, the username")
