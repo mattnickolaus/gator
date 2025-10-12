@@ -105,6 +105,30 @@ func HandlerFeedFollow(s *state, cmd command, user database.User) error {
 	return nil
 }
 
+func HandlerUnfollow(s *state, cmd command, user database.User) error {
+	if numArgs := len(cmd.Args); numArgs != 1 {
+		return fmt.Errorf("The unfollow command accepts a single argument:\n\tUrl: the url to the chosen feed to unfollow")
+	}
+	feedsUrl := cmd.Args[0]
+
+	chosenFeed, err := s.db.GetFeedByUrl(context.Background(), feedsUrl)
+	if err != nil {
+		return fmt.Errorf("Error: Unable to retrieve feed with that url\n%v\n", err)
+	}
+
+	deleteParam := database.DeleteFeedFollowByIDsParams{
+		UserID: user.ID,
+		FeedID: chosenFeed.ID,
+	}
+
+	err = s.db.DeleteFeedFollowByIDs(context.Background(), deleteParam)
+	if err != nil {
+		return fmt.Errorf("Error deleting recrod from the database: %v", err)
+	}
+
+	return nil
+}
+
 func HandlerFollowing(s *state, cmd command, user database.User) error {
 	if numArgs := len(cmd.Args); numArgs != 0 {
 		return fmt.Errorf("The following command accepts no arguments")
