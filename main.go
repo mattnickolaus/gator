@@ -42,6 +42,7 @@ func main() {
 	cmds.Register("follow", middlewareLoggedIn(HandlerFeedFollow))
 	cmds.Register("following", middlewareLoggedIn(HandlerFollowing))
 	cmds.Register("unfollow", middlewareLoggedIn(HandlerUnfollow))
+	cmds.Register("browse", middlewareLoggedIn(HandlerBrowse))
 
 	args := os.Args
 	if len(args) < 2 {

@@ -47,7 +47,10 @@ func HandlerAddFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("Error writing the feed follow: %v\n", err)
 	}
-	fmt.Printf("created new feed record with the following data:\n%+v\n", createdFeed)
+	fmt.Printf("created new feed record with the following data:\n")
+	fmt.Printf("\tFeed Name\tUrl\tCreated At\n")
+	fmt.Printf("\t%s\t%v\t%v\n", createdFeed.Name, createdFeed.Url, createdFeed.CreatedAt.Format("2006-01-02 15:04:05"))
+
 	fmt.Printf("You (%v) are now following this feed\n", followedRowData.UserName)
 
 	return nil
@@ -125,6 +128,7 @@ func HandlerUnfollow(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("Error deleting recrod from the database: %v", err)
 	}
+	fmt.Printf("Successfully unfollowed %v", chosenFeed.Name)
 
 	return nil
 }
@@ -141,7 +145,7 @@ func HandlerFollowing(s *state, cmd command, user database.User) error {
 
 	fmt.Printf("You (%v) are following these feeds:\n", user.Name)
 	for _, feed := range following {
-		fmt.Printf("\t* %v\n", feed.FeedName)
+		fmt.Printf("\t* %v - %v\n", feed.FeedName, feed.FeedUrl)
 	}
 
 	return nil
