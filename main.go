@@ -11,8 +11,9 @@ import (
 )
 
 type state struct {
-	db  *database.Queries
-	cfg *config.Config
+	dbConn *sql.DB
+	db     *database.Queries
+	cfg    *config.Config
 }
 
 func main() {
@@ -25,8 +26,9 @@ func main() {
 	dbQueries := database.New(db)
 
 	programState := &state{
-		db:  dbQueries,
-		cfg: &c,
+		dbConn: db,
+		db:     dbQueries,
+		cfg:    &c,
 	}
 
 	cmds := commands{
@@ -43,6 +45,9 @@ func main() {
 	cmds.Register("following", middlewareLoggedIn(HandlerFollowing))
 	cmds.Register("unfollow", middlewareLoggedIn(HandlerUnfollow))
 	cmds.Register("browse", middlewareLoggedIn(HandlerBrowse))
+	cmds.Register("setup", HandlerSetUp)
+	cmds.Register("takedown", HandlerTakeDown)
+	cmds.Register("help", HandlerHelp)
 
 	args := os.Args
 	if len(args) < 2 {

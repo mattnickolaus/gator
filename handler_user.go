@@ -49,7 +49,7 @@ func HanlderRegister(s *state, cmd command) error {
 	// Should return err = sql: no rows in result set
 	response, err := s.db.GetUser(context.Background(), newUserName)
 	if err != sql.ErrNoRows {
-		return fmt.Errorf("Error: User '%s' already exists\nExisting User has the following data: %+v", newUserName, response)
+		return fmt.Errorf("Error: User '%s' already exists\n", response.Name)
 	}
 
 	regParam := database.CreateUserParams{
@@ -69,7 +69,7 @@ func HanlderRegister(s *state, cmd command) error {
 		return fmt.Errorf("Error %v", err)
 	}
 
-	fmt.Printf("New user with name '%v' was created with the following data:\n %+v\n", user.Name, user)
+	fmt.Printf("New user with name '%v' was created\n", user.Name)
 
 	return nil
 }
@@ -100,7 +100,7 @@ func HandlerUsers(s *state, cmd command) error {
 	}
 
 	if len(users) == 0 {
-		return fmt.Errorf("Error: There are currently no registered users")
+		return fmt.Errorf("Error: There are currently no registered users\n\tRun gator register <username> to setup a user")
 	}
 
 	for _, u := range users {

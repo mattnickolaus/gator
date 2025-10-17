@@ -47,7 +47,7 @@ func HandlerAddFeed(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("Error writing the feed follow: %v\n", err)
 	}
-	fmt.Printf("created new feed record with the following data:\n")
+	fmt.Printf("Created new feed record with the following data:\n")
 	fmt.Printf("\tFeed Name\tUrl\tCreated At\n")
 	fmt.Printf("\t%s\t%v\t%v\n", createdFeed.Name, createdFeed.Url, createdFeed.CreatedAt.Format("2006-01-02 15:04:05"))
 
