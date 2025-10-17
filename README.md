@@ -73,7 +73,7 @@ This file should contain the following:
 
 Replace the `db_url` with your PostgreSQL connection string except add the `?sslmode=disable` parameter. The `current_user_name` will be automatically set when you log in and can be left blank.
 
-## Usage
+### Set Up Schema 
 
 Once you have configured gator, you can run the following command to ensure the schema is set. 
 
@@ -81,13 +81,24 @@ Once you have configured gator, you can run the following command to ensure the 
 gator setup
 ```
 
-### Commands
+### Account Setup
 
-Here are some of the commands you can use with gator:
+The last step to is to register your user account by just defining your username with the following command: 
+
+```bash
+gator register <username>
+```
+
+Upon running the register command, your user will be logged and you are all setup to start aggregating some RSS feeds! 
+
+## Commands
+
+Run `gator help` to see a list of command or reference the follwoing list you can use with gator:
 
 *   `gator register <username>`: Register a new user.
 *   `gator login <username>`: Log in as a user.
 *   `gator users`: List all registered users.
+
 *   `gator addfeed <url>`: Add a new RSS feed.
 *   `gator feeds`: List all RSS feeds.
 *   `gator follow <feed_id>`: Follow a feed.
@@ -95,8 +106,8 @@ Here are some of the commands you can use with gator:
 *   `gator unfollow <feed_id>`: Unfollow a feed.
 *   `gator browse`: Browse the latest posts from your followed feeds.
 *   `gator agg`: Manually trigger the aggregator to fetch new posts.
+
 *   `gator reset`: Reset the database and run all migrations.
 *   `gator setup`: Setup the database schema for gator.
 *   `gator takedown`: Takes down the database schema for gator.
-
-
+*   `gator help`: Provides a similar list describe the usage for each command 
